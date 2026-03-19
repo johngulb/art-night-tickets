@@ -1,364 +1,260 @@
 'use client';
 
-import styled from 'styled-components';
-import Link from 'next/link';
+import styled, { createGlobalStyle } from 'styled-components';
 import BuyButton from '../components/BuyButton';
 
-const PageContainer = styled.div`
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+const theme = {
+  burntOrange: '#E76F3C',
+  deepRed: '#8C1D18',
+  warmYellow: '#F4C95D',
+  black: '#111111',
+  offWhite: '#F5EDE3',
+  fontHeadline: "'Abril Fatface', Georgia, serif",
+  fontTagline: "'Permanent Marker', cursive",
+  fontBody: "'Space Grotesk', -apple-system, sans-serif",
+  fontAccent: "'Libre Baskerville', Georgia, serif",
+};
+
+const GlobalPortraitsStyles = createGlobalStyle`
+  :root {
+    --portraits-burnt: ${theme.burntOrange};
+    --portraits-red: ${theme.deepRed};
+    --portraits-yellow: ${theme.warmYellow};
+    --portraits-black: ${theme.black};
+    --portraits-offwhite: ${theme.offWhite};
+    --font-headline: ${theme.fontHeadline};
+    --font-tagline: ${theme.fontTagline};
+    --font-body: ${theme.fontBody};
+    --font-accent: ${theme.fontAccent};
+  }
+`;
+
+const noiseSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
+
+const PageWrapper = styled.div`
+  font-family: ${theme.fontBody};
+  color: ${theme.black};
+  background: ${theme.offWhite};
+`;
+
+const Hero = styled.section`
   min-height: 100vh;
-  font-family: var(--font-geist-sans);
-  background: linear-gradient(135deg, #050d05, #0a2a0a, #061d0e, #011510);
-  position: relative;
-  overflow: hidden;
-  color: #ffffff;
-`;
-
-const FloatingParticle = styled.div`
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.8;
-  box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.5);
-  animation: float 15s infinite ease-in-out, glow 3s infinite ease-in-out;
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translate(0, 0);
-    }
-    25% {
-      transform: translate(10px, -20px);
-    }
-    50% {
-      transform: translate(-15px, -35px);
-    }
-    75% {
-      transform: translate(20px, -15px);
-    }
-  }
-
-  @keyframes glow {
-    0%, 100% {
-      opacity: 0.2;
-      box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.3);
-    }
-    50% {
-      opacity: 0.9;
-      box-shadow: 0 0 25px 5px rgba(255, 255, 255, 0.7);
-    }
-  }
-`;
-
-const Header = styled.header`
-  text-align: center;
-  width: 100%;
-  max-width: 56rem;
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
-  padding: 0.5rem;
-  padding-top: 17rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-height: 30vh;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(165deg, #E76F3C 0%, #C45A2E 25%, #8C1D18 55%, #B85C1A 75%, #F4C95D 100%);
 
-  p {
-    font-size: 0.75rem;
-    margin-top: 0.75rem;
-    margin-bottom: 0;
-    color: #a7f3d0;
-    max-width: 90%;
-  }
-
-  @media (min-width: 640px) {
-    padding: 1rem;
-    padding-top: 8rem;
-    padding-bottom: 0;
-
-    p {
-      font-size: 0.875rem;
-      margin-top: 1rem;
-      max-width: 100%;
-    }
-  }
-
-  @media (min-width: 768px) {
-    padding-top: 14rem;
-    padding-bottom: 0;
-  }
-`;
-
-const MainTitle = styled.h1`
-  font-size: 3rem;
-  font-weight: 900;
-  margin-bottom: 0.5rem;
-  font-family: var(--font-cambria);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: linear-gradient(to right, #d4fc79 0%, #96e6a1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 10px rgba(212, 252, 121, 0.3);
-  animation: glowFade 3s ease-in-out infinite alternate;
-  line-height: 1.1;
-  box-shadow: none !important;
-
-  @keyframes glowFade {
-    from {
-      opacity: 0.5;
-      text-shadow: 0 0 10px rgba(212, 252, 121, 0.3);
-    }
-    to {
-      opacity: 1;
-      text-shadow: 0 0 15px rgba(212, 252, 121, 0.4);
-    }
-  }
-
-  @media (min-width: 640px) {
-    font-size: 4rem;
-    margin-bottom: 0.75rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 5.5rem;
-  }
-  @media (min-width: 1024px) {
-    font-size: 6.5rem;
-    line-height: 1.2;
-  }
-`;
-
-const EventProduction = styled.h4`
-  font-size: 1rem;
-  margin-top: 0.25rem;
-  font-family: var(--font-cambria);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: #a7f3d0;
-  text-shadow: 0 0 10px rgba(167, 243, 208, 0.5),
-    0 0 15px rgba(167, 243, 208, 0.3);
-
-  @media (min-width: 640px) {
-    font-size: 1.25rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.5rem;
-  }
-`;
-
-const SubTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #a7f3d0;
-  font-family: var(--font-cambria);
-  text-shadow: 0 0 10px rgba(167, 243, 208, 0.5),
-    0 0 15px rgba(167, 243, 208, 0.3);
-  letter-spacing: 0.08em;
-  margin: 0.25rem 0;
-
-  @media (min-width: 640px) {
-    font-size: 2rem;
-    margin: 0.5rem 0;
-  }
-  @media (min-width: 768px) {
-    font-size: 2.5rem;
-  }
-`;
-
-const EventTime = styled.h4`
-  font-size: 1rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0;
-  font-family: var(--font-cambria);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  background: linear-gradient(to right, #d1fae5 0%, #a7f3d0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(209, 250, 229, 0.6),
-    0 0 15px rgba(74, 222, 128, 0.4);
-
-  @media (min-width: 640px) {
-    font-size: 1.5rem;
-    margin-top: 0.5rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.75rem;
-  }
-`;
-
-const EventLocation = styled.h4`
-  font-size: 1rem;
-  margin-top: 0.25rem;
-  font-family: var(--font-cambria);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-
-  @media (min-width: 640px) {
-    font-size: 1.25rem;
-    margin-top: 0.5rem;
-  }
-`;
-
-const EventImage = styled.img`
-  width: 100%;
-  height: 100vh;
-  object-fit: cover;
-  object-position: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  opacity: 0.35;
-  margin: 0;
-  padding: 0;
-
-  @media (max-width: 768px) {
-    height: 56vh;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: ${noiseSvg};
+    opacity: 0.12;
+    pointer-events: none;
   }
 
   &::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 1;
+    background: radial-gradient(ellipse 80% 50% at 50% 50%, transparent 0%, rgba(0,0,0,0.15) 100%);
+    pointer-events: none;
   }
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 1rem;
+const FloatingSketch = styled.div<{ $left: string; $top: string; $delay: number }>`
+  position: absolute;
+  left: ${(p) => p.$left};
+  top: ${(p) => p.$top};
+  width: 48px;
+  height: 48px;
+  opacity: 0.35;
+  pointer-events: none;
+  animation: floatSketch 12s ease-in-out infinite;
+  animation-delay: ${(p) => p.$delay}s;
+  @keyframes floatSketch {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(8px, -12px) rotate(5deg); }
+    66% { transform: translate(-6px, -6px) rotate(-3deg); }
+  }
 `;
 
-const LearnMoreLink = styled(Link)`
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #5c5c3d, #4a4433);
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: bold;
-  font-size: 1rem;
-  font-family: var(--font-cambria);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+const HeroContent = styled.div`
   position: relative;
-  overflow: hidden;
-  width: auto;
-  min-width: 180px;
-  max-width: 250px;
-  transition: all 0.3s;
-  box-shadow: 0 0 20px rgba(92, 92, 61, 0.5),
-    0 10px 15px -3px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  text-decoration: none;
-  text-align: center;
-  display: inline-block;
+  z-index: 2;
+  max-width: 42rem;
+`;
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 30px rgba(92, 92, 61, 0.7),
-      0 15px 20px -5px rgba(0, 0, 0, 0.3);
-  }
-
-  @media (max-width: 640px) {
-    font-size: 0.875rem;
-    padding: 0.625rem 1.25rem;
-    min-width: 150px;
-    max-width: 200px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.8rem;
-    padding: 0.75rem 1rem;
-    min-width: 120px;
-    max-width: 180px;
-    letter-spacing: 0.03em;
+const LipsWrapper = styled.div`
+  margin-bottom: 1.5rem;
+  animation: lipsGlow 4s ease-in-out infinite alternate;
+  @keyframes lipsGlow {
+    from { filter: drop-shadow(0 0 20px rgba(244, 201, 93, 0.4)); }
+    to { filter: drop-shadow(0 0 35px rgba(244, 201, 93, 0.7)); }
   }
 `;
+
+const HeroHeadline = styled.h1`
+  font-family: ${theme.fontHeadline};
+  font-size: clamp(3rem, 11vw, 6.5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: ${theme.black};
+  text-transform: uppercase;
+  line-height: 0.95;
+  margin: 0 0 0.5rem;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+`;
+
+const HeroSubhead = styled.p`
+  font-family: ${theme.fontTagline};
+  font-size: 1rem;
+  color: ${theme.black};
+  opacity: 0.9;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.04em;
+  @media (min-width: 640px) {
+    font-size: 1.125rem;
+  }
+`;
+
+const HeroVenue = styled.p`
+  font-family: ${theme.fontAccent};
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${theme.black};
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.02em;
+  @media (min-width: 640px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const HeroDateTime = styled.p`
+  font-family: ${theme.fontAccent};
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${theme.black};
+  margin: 0 0 1rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 0 24px rgba(245, 237, 227, 0.5);
+  @media (min-width: 640px) {
+    font-size: 1.6rem;
+  }
+`;
+
+const HeroSupporting = styled.p`
+  font-family: ${theme.fontBody};
+  font-size: 0.95rem;
+  color: ${theme.black};
+  opacity: 0.85;
+  margin: 0 0 1.5rem;
+  max-width: 28ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+  @media (min-width: 640px) {
+    font-size: 1.05rem;
+  }
+`;
+
+const CTAGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+`;
+
+const CTAPrimary = styled.div`
+  display: inline-block;
+`;
+
+
+function LipsIllustration() {
+  return (
+    <svg
+      width="180"
+      height="100"
+      viewBox="0 0 180 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ maxWidth: '100%', height: 'auto' }}
+    >
+      <path
+        d="M20 55 Q45 25 90 45 Q135 25 160 55 Q140 75 90 85 Q40 75 20 55Z"
+        fill="#111"
+        stroke="#111"
+        strokeWidth="2"
+      />
+      <ellipse cx="70" cy="52" rx="8" ry="6" fill="#8C1D18" opacity="0.9" />
+      <ellipse cx="110" cy="52" rx="8" ry="6" fill="#8C1D18" opacity="0.9" />
+      <ellipse cx="70" cy="52" rx="3" ry="2" fill="#F4C95D" />
+      <ellipse cx="110" cy="52" rx="3" ry="2" fill="#F4C95D" />
+    </svg>
+  );
+}
+
+export default function Home() {
+  return (
+    <PageWrapper>
+      <GlobalPortraitsStyles />
+      <Hero>
+        <FloatingSketch $left="12%" $top="18%" $delay={0}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><circle cx="12" cy="12" r="3" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2" /></svg>
+        </FloatingSketch>
+        <FloatingSketch $left="78%" $top="22%" $delay={2}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M12 4l2 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z" /></svg>
+        </FloatingSketch>
+        <FloatingSketch $left="8%" $top="72%" $delay={1}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M4 20l4-12 4 4 4-8 4 16" /></svg>
+        </FloatingSketch>
+        <FloatingSketch $left="82%" $top="68%" $delay={3}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><ellipse cx="12" cy="12" rx="6" ry="8" /></svg>
+        </FloatingSketch>
+        <HeroContent>
+          <LipsWrapper>
+            <LipsIllustration />
+          </LipsWrapper>
+          <HeroHeadline>Portraits</HeroHeadline>
+          <HeroSubhead>Art Night Detroit Presents</HeroSubhead>
+          <HeroVenue>At The Godfrey</HeroVenue>
+          <HeroDateTime>April 13 · 7PM – 11PM</HeroDateTime>
+          <HeroSupporting>
+            A night of live expression, music, and creative experimentation.
+          </HeroSupporting>
+          <CTAGroup>
+            <CTAPrimary>
+              <BuyButton label="Get Tickets" variant="portraits" />
+            </CTAPrimary>
+          </CTAGroup>
+        </HeroContent>
+      </Hero>
+    </PageWrapper>
+  );
+}
 
 export async function getStaticProps() {
   return {
     props: {
-      metadata,
+      metadata: {
+        title: "Portraits @ The Godfrey | Art Night Detroit",
+        description:
+          "A night of live expression, music, and creative experimentation. April 13, 7–11pm at The Godfrey.",
+        openGraph: {
+          title: "Portraits @ The Godfrey | Art Night Detroit",
+          description:
+            "April 13, 7–11pm at The Godfrey. Live art, DJs, portrait workshop, caricature booth.",
+          images: [{ url: "/arts-for-the-earth-banner.jpg", width: 1200, height: 630, alt: "Portraits @ The Godfrey" }],
+          type: "website",
+          locale: "en_US",
+        },
+      },
     },
   };
-}
-
-// Add metadata for SEO
-export const metadata = {
-  title: 'Arts For The Earth | A Burg Ink Production',
-  description:
-    'Join us for Arts For The Earth, a celebration of creativity and environmental awareness through art, music, and community engagement.',
-  keywords:
-    'arts, earth, environment, community, detroit, art exhibition, music, sustainability',
-  openGraph: {
-    title: 'Arts For The Earth | A Burg Ink Production',
-    description:
-      'A celebration of creativity and environmental awareness through art, music, and community engagement.',
-    images: [
-      {
-        url: '/arts-for-the-earth-banner.jpg',
-        width: 1200,
-        height: 800,
-        alt: 'Arts For The Earth',
-      },
-    ],
-    type: 'website',
-  },
-};
-
-export default function Home() {
-  // Create an array of positions for the fireflies
-  const fireflies = Array.from({ length: 25 }, (_, i) => ({
-    id: i,
-    style: {
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${Math.random() * 15}s`,
-      animationDuration: `${15 + Math.random() * 10}s`,
-      animation: `float ${15 + Math.random() * 10}s infinite ease-in-out ${Math.random() * 15}s, 
-                 glow ${2 + Math.random() * 2}s infinite ease-in-out ${Math.random() * 2}s`,
-    },
-  }));
-
-  return (
-    <PageContainer>
-      {fireflies.map((firefly) => (
-        <FloatingParticle
-          key={firefly.id}
-          style={firefly.style}
-        />
-      ))}
-      <Header>
-        <MainTitle>ARTS FOR THE EARTH</MainTitle>
-        <EventProduction>A BURG INK PRODUCTION</EventProduction>
-        <SubTitle>APRIL 26, 2025</SubTitle>
-        <EventTime>12PM - 2AM</EventTime>
-        <EventLocation>2804 WIGHT ST, DETROIT, MI</EventLocation>
-        <ButtonContainer>
-          <BuyButton />
-          <LearnMoreLink href="/about">Learn More</LearnMoreLink>
-        </ButtonContainer>
-        <p>
-          All proceeds benefit: Water Protectors Network, Friends of the Rouge,
-          & Greening of Detroit—supporting the vital work of protecting our
-          planet and its future generations.
-        </p>
-      </Header>
-      <EventImage
-        src="/arts-for-earth-blank.png"
-        alt="Arts For The Earth Event"
-      />
-    </PageContainer>
-  );
 }

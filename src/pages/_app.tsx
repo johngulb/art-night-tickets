@@ -7,21 +7,18 @@ import { Analytics } from "@vercel/analytics/react";
 
 // Default metadata for the application
 const defaultMetadata = {
-  title: 'Arts For The Earth | A Burg Ink Production',
-  description: 'Join us for Arts For The Earth, a celebration of creativity and environmental awareness through art, music, and community engagement.',
+  title: "Portraits @ The Godfrey | Art Night Detroit",
+  description:
+    "A night of live expression, music, and creative experimentation. Live art, full DJ lineup, portrait workshop, caricature booth. April 13, 7–11pm at The Godfrey.",
   openGraph: {
-    title: 'Arts For The Earth | A Burg Ink Production',
-    description: 'A celebration of creativity and environmental awareness through art, music, and community engagement.',
+    title: "Portraits @ The Godfrey | Art Night Detroit",
+    description:
+      "Live art, DJs, portrait workshop, caricature booth. April 13, 7–11pm. Art supplies provided. Food & cash bar.",
     images: [
-      {
-        url: '/images/arts-for-earth-banner.png',
-        width: 1200,
-        height: 630,
-        alt: 'Arts For The Earth',
-      },
+      { url: "/arts-for-the-earth-banner.jpg", width: 1200, height: 630, alt: "Portraits @ The Godfrey" },
     ],
-    type: 'website',
-    locale: 'en_US',
+    type: "website",
+    locale: "en_US",
   },
 };
 

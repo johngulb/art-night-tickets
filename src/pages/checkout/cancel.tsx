@@ -1,8 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+
+const theme = {
+  burntOrange: '#E76F3C',
+  deepRed: '#8C1D18',
+  warmYellow: '#F4C95D',
+  black: '#111111',
+  offWhite: '#F5EDE3',
+  fontHeadline: "'Abril Fatface', Georgia, serif",
+  fontTagline: "'Permanent Marker', cursive",
+  fontBody: "'Space Grotesk', -apple-system, sans-serif",
+  fontAccent: "'Libre Baskerville', Georgia, serif",
+};
+
+const noiseSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
 const CancelContainer = styled.div`
   display: flex;
@@ -10,155 +25,94 @@ const CancelContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 1rem;
-  background: linear-gradient(135deg, #050d05, #0a2a0a, #061d0e, #011510);
-  color: #ffffff;
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(165deg, #E76F3C 0%, #C45A2E 25%, #8C1D18 55%, #B85C1A 75%, #F4C95D 100%);
+  font-family: ${theme.fontBody};
+  color: ${theme.black};
   text-align: center;
-  font-family: var(--font-geist-sans);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: ${noiseSvg};
+    opacity: 0.1;
+    pointer-events: none;
+  }
 
   @media (min-width: 768px) {
-    padding: 2rem;
+    padding: 3rem 2rem;
   }
 `;
 
-const CancelHeader = styled.div`
-  width: 100%;
-  padding: 1rem;
-  padding-top: 6rem;
-  padding-bottom: 0;
-
-  @media (min-width: 768px) {
-    padding: 2rem;
-    padding-top: 12rem;
-    padding-bottom: 0;
-  }
+const CancelInner = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: 28rem;
 `;
 
 const CancelTitle = styled.h1`
-  font-size: 1.8rem;
-  margin-bottom: 0.75rem;
-  color: #ff6b6b;
-  font-family: var(--font-cambria);
+  font-family: ${theme.fontHeadline};
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 400;
+  color: ${theme.black};
+  margin: 0 0 1rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-align: center;
-
-  @media (min-width: 768px) {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-  }
+  letter-spacing: 0.02em;
 `;
 
 const CancelMessage = styled.p`
+  font-family: ${theme.fontBody};
   font-size: 1rem;
-  margin-bottom: 1.5rem;
-  max-width: 800px;
-  line-height: 1.5;
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
+  line-height: 1.6;
+  color: ${theme.black};
+  margin: 0 0 1.5rem;
+  opacity: 0.9;
 
   @media (min-width: 768px) {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    line-height: 1.6;
+    font-size: 1.1rem;
   }
 `;
 
-const EarthImage = styled.div`
-  width: 150px;
-  height: 150px;
-  margin: 1.5rem auto;
-  background-image: url('/SadEarth.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.8;
-
-  @media (min-width: 768px) {
-    width: 300px;
-    height: 300px;
-    margin: 2rem auto;
-  }
+const EventDetails = styled.p`
+  font-family: ${theme.fontAccent};
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: ${theme.black};
+  margin: 0 0 2rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
-const FactsContainer = styled.div`
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin: 2rem 0;
-  max-width: 800px;
-`;
-
-const FactTitle = styled.h3`
-  color: #a7f3d0;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-`;
-
-const FactList = styled.ul`
-  text-align: left;
-  margin-bottom: 1.5rem;
-`;
-
-const FactItem = styled.li`
-  margin-bottom: 0.75rem;
-  position: relative;
-  padding-left: 1.5rem;
-
-  &:before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: #ff6b6b;
-  }
-`;
-
-const ReturnButton = styled.a`
+const ReturnButton = styled(Link)`
   display: inline-block;
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #4ade80, #22c55e);
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: bold;
+  padding: 0.875rem 1.75rem;
+  background: ${theme.deepRed};
+  color: ${theme.offWhite};
+  font-family: ${theme.fontBody};
+  font-weight: 600;
   font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-decoration: none;
-  transition: all 0.3s;
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(140, 29, 24, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 30px rgba(74, 222, 128, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(140, 29, 24, 0.6);
   }
-`;
-
-const RainEffect = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-`;
-
-const Raindrop = styled.div`
-  position: absolute;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 0 0 5px 5px;
-  z-index: -1;
 `;
 
 export const getServerSideProps = async () => {
   return {
     props: {
       metadata: {
-        title: 'Checkout Canceled',
-        description:
-          'Your purchase was cancelled, and somewhere, a tree just lost its last leaf. The Earth was counting on your support today.',
+        title: 'Checkout cancelled | Portraits @ The Godfrey',
+        description: 'Your checkout was cancelled. Get your ticket for Portraits at The Godfrey — April 13, 7–11pm.',
       },
     },
   };
@@ -166,34 +120,8 @@ export const getServerSideProps = async () => {
 
 export default function CheckoutCancel() {
   const router = useRouter();
-  const [raindrops, setRaindrops] = useState<
-    Array<{
-      id: number;
-      left: string;
-      height: string;
-      animationDuration: string;
-      animationDelay: string;
-    }>
-  >([]);
 
   useEffect(() => {
-    // Create rain effect
-    const dropCount = 50;
-    const newRaindrops = [];
-
-    for (let i = 0; i < dropCount; i++) {
-      newRaindrops.push({
-        id: i,
-        left: `${Math.random() * 100}%`,
-        height: `${Math.random() * 20 + 10}px`,
-        animationDuration: `${Math.random() * 1 + 0.5}s`,
-        animationDelay: `${Math.random() * 2}s`,
-      });
-    }
-
-    setRaindrops(newRaindrops);
-
-    // Cancel the checkout session via API
     const cancelCheckout = async () => {
       try {
         const { session_id } = router.query;
@@ -210,72 +138,18 @@ export default function CheckoutCancel() {
 
   return (
     <CancelContainer>
-      <RainEffect>
-        {raindrops.map((drop) => (
-          <Raindrop
-            key={drop.id}
-            style={{
-              left: drop.left,
-              height: drop.height,
-              animation: `falling ${drop.animationDuration} linear ${drop.animationDelay} infinite`,
-            }}
-          />
-        ))}
-      </RainEffect>
-
-      <CancelHeader>
-        <CancelTitle>Oh No! You&apos;ve Abandoned Mother Earth</CancelTitle>
+      <CancelInner>
+        <CancelTitle>Checkout cancelled</CancelTitle>
         <CancelMessage>
-          Your purchase was cancelled, and somewhere, a tree just lost its last
-          leaf. The Earth was counting on your support today.
+          No worries — you can grab your ticket anytime. We&apos;ll be here.
         </CancelMessage>
-      </CancelHeader>
-
-      <EarthImage />
-
-      <FactsContainer>
-        <FactTitle>
-          What Your Cancelled Purchase Could Have Supported:
-        </FactTitle>
-        <FactList>
-          <FactItem>
-            Planting native trees to restore urban forests in Detroit
-          </FactItem>
-          <FactItem>
-            Cleaning up plastic pollution from the Great Lakes
-          </FactItem>
-          <FactItem>
-            Supporting indigenous water protectors fighting for clean water
-          </FactItem>
-          <FactItem>
-            Educational programs teaching the next generation about
-            sustainability
-          </FactItem>
-          <FactItem>
-            Community gardens providing fresh food in urban food deserts
-          </FactItem>
-        </FactList>
-      </FactsContainer>
-
-      <CancelMessage>
-        Every ticket purchase helps fund vital environmental initiatives.
-        Without your support, these projects may not reach their full potential.
-        The Earth gives us everything - clean air, water, food, and beauty. What
-        will you give back?
-      </CancelMessage>
-
-      <ReturnButton href="/">Reconsider and Return to Event</ReturnButton>
-
-      <style jsx global>{`
-        @keyframes falling {
-          0% {
-            transform: translateY(-100vh);
-          }
-          100% {
-            transform: translateY(100vh);
-          }
-        }
-      `}</style>
+        <EventDetails>
+          Portraits @ The Godfrey<br />
+          April 13 · 7PM – 11PM<br />
+          1401 Michigan Ave, Detroit
+        </EventDetails>
+        <ReturnButton href="/">Get Tickets</ReturnButton>
+      </CancelInner>
     </CancelContainer>
   );
 }

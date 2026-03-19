@@ -62,7 +62,7 @@ const Collectables = () => {
   return (
     <CollectablesContainer>
       <CollectablesTitle>
-        <TitleLine>ARTS FOR THE EARTH</TitleLine>
+        <TitleLine>PORTRAIT&apos;S AT THE GODFREY</TitleLine>
         <TitleLine>Collectibles</TitleLine>
       </CollectablesTitle>
 
