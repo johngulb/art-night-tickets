@@ -219,9 +219,9 @@ export default function Home() {
           <HeroHeadline>Portraits</HeroHeadline>
           <HeroVenue>At The Godfrey</HeroVenue>
           <HeroDateTime>April 13 · 7PM – 11PM</HeroDateTime>
-          <HeroSupporting>
+          {/* <HeroSupporting>
             A night of live expression, music, and creative experimentation.
-          </HeroSupporting>
+          </HeroSupporting> */}
           <CTAGroup>
             <CTAPrimary>
               <BuyButton label="Get Tickets" variant="portraits" />
