@@ -13,7 +13,7 @@ const MAX_PER_ORDER = 50;
 
 const defaultTicketTypes: TicketType[] = [
   {
-    id: "general-event-1",
+    id: "general-event-4",
     name: "General Admission",
     description:
       "Portraits @ The Godfrey — April 13, 7–11PM at The Godfrey. Live art, DJs, portrait workshop, caricature booth. Art supplies provided.",
