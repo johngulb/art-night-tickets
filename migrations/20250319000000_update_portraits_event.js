@@ -1,5 +1,5 @@
 /**
- * Update event id 1 and its ticket types to Portraits @ The Godfrey ($10 General Admission).
+ * Update event id 4 and its ticket types to Portraits @ The Godfrey ($10 General Admission).
  * Run with: npx knex migrate:latest
  * (Ensure DB_CLIENT and DB_CONNECTION_STRING are set for your environment.)
  *
@@ -12,7 +12,7 @@ exports.up = async function (knex) {
 
   if (hasEvents) {
     await knex('events')
-      .where({ id: 1 })
+      .where({ id: 4 })
       .update({
         title: 'Portraits @ The Godfrey',
         date: '2025-04-13',
@@ -24,7 +24,7 @@ exports.up = async function (knex) {
 
   if (hasTicketTypes) {
     await knex('ticket_types')
-      .where({ event_id: 1 })
+      .where({ event_id: 4 })
       .update({
         name: 'General Admission',
         description:
@@ -44,7 +44,7 @@ exports.down = async function (knex) {
 
   if (hasEvents) {
     await knex('events')
-      .where({ id: 1 })
+      .where({ id: 4 })
       .update({
         title: 'Arts For The Earth',
         date: null,
@@ -55,7 +55,7 @@ exports.down = async function (knex) {
 
   if (hasTicketTypes) {
     await knex('ticket_types')
-      .where({ event_id: 1 })
+      .where({ event_id: 4 })
       .update({
         name: 'Arts For The Earth General Admission',
         description: 'Standard entry to Arts For The Earth',

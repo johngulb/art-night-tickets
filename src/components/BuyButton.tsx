@@ -224,7 +224,7 @@ const BuyButton = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          eventId: "1",
+          eventId: "4",
           items: lineItems,
         }),
       });
