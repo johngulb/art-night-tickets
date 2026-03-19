@@ -215,8 +215,8 @@ export default function Home() {
               style={{ width: '100%', height: 'auto', display: 'block' }}
             />
           </PosterWrap>
-          <HeroHeadline>Portraits</HeroHeadline>
           <HeroSubhead>Art Night Detroit Presents</HeroSubhead>
+          <HeroHeadline>Portraits</HeroHeadline>
           <HeroVenue>At The Godfrey</HeroVenue>
           <HeroDateTime>April 13 · 7PM – 11PM</HeroDateTime>
           <HeroSupporting>
