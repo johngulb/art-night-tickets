@@ -507,7 +507,7 @@ export default function Home() {
 
         <ImageContainer>
           <EventImage
-            src="/arts-for-the-earth-group-painting.jpg"
+            src="/portraits-godfrey-poster.png"
             alt="Group painting created during Arts for the Earth event"
           />
           <ImageCaption>

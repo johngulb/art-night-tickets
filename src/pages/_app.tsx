@@ -15,7 +15,12 @@ const defaultMetadata = {
     description:
       "Live art, DJs, portrait workshop, caricature booth. April 13, 7–11pm. Art supplies provided. Food & cash bar.",
     images: [
-      { url: "/arts-for-the-earth-banner.jpg", width: 1200, height: 630, alt: "Portraits @ The Godfrey" },
+      {
+        url: "/portraits-godfrey-poster.png",
+        width: 1224,
+        height: 1584,
+        alt: "Art Night Detroit presents Portraits at The Godfrey",
+      },
     ],
     type: "website",
     locale: "en_US",

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import styled, { createGlobalStyle } from 'styled-components';
 import BuyButton from '../components/BuyButton';
 
@@ -90,12 +91,21 @@ const HeroContent = styled.div`
   max-width: 42rem;
 `;
 
-const LipsWrapper = styled.div`
-  margin-bottom: 1.5rem;
-  animation: lipsGlow 4s ease-in-out infinite alternate;
-  @keyframes lipsGlow {
-    from { filter: drop-shadow(0 0 20px rgba(244, 201, 93, 0.4)); }
-    to { filter: drop-shadow(0 0 35px rgba(244, 201, 93, 0.7)); }
+const PosterWrap = styled.div`
+  position: relative;
+  width: min(100%, 22rem);
+  margin: 0 auto 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+  animation: posterGlow 4s ease-in-out infinite alternate;
+  @keyframes posterGlow {
+    from {
+      filter: drop-shadow(0 0 20px rgba(244, 201, 93, 0.35));
+    }
+    to {
+      filter: drop-shadow(0 0 36px rgba(244, 201, 93, 0.65));
+    }
   }
 `;
 
@@ -176,30 +186,6 @@ const CTAPrimary = styled.div`
 `;
 
 
-function LipsIllustration() {
-  return (
-    <svg
-      width="180"
-      height="100"
-      viewBox="0 0 180 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ maxWidth: '100%', height: 'auto' }}
-    >
-      <path
-        d="M20 55 Q45 25 90 45 Q135 25 160 55 Q140 75 90 85 Q40 75 20 55Z"
-        fill="#111"
-        stroke="#111"
-        strokeWidth="2"
-      />
-      <ellipse cx="70" cy="52" rx="8" ry="6" fill="#8C1D18" opacity="0.9" />
-      <ellipse cx="110" cy="52" rx="8" ry="6" fill="#8C1D18" opacity="0.9" />
-      <ellipse cx="70" cy="52" rx="3" ry="2" fill="#F4C95D" />
-      <ellipse cx="110" cy="52" rx="3" ry="2" fill="#F4C95D" />
-    </svg>
-  );
-}
-
 export default function Home() {
   return (
     <PageWrapper>
@@ -218,9 +204,17 @@ export default function Home() {
           <svg viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><ellipse cx="12" cy="12" rx="6" ry="8" /></svg>
         </FloatingSketch>
         <HeroContent>
-          <LipsWrapper>
-            <LipsIllustration />
-          </LipsWrapper>
+          <PosterWrap>
+            <Image
+              src="/portraits-godfrey-poster.png"
+              alt="Art Night Detroit presents Portraits at The Godfrey — April 13, 7pm–11pm"
+              width={1224}
+              height={1584}
+              priority
+              sizes="(max-width: 480px) 100vw, 352px"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+          </PosterWrap>
           <HeroHeadline>Portraits</HeroHeadline>
           <HeroSubhead>Art Night Detroit Presents</HeroSubhead>
           <HeroVenue>At The Godfrey</HeroVenue>
@@ -250,7 +244,14 @@ export async function getStaticProps() {
           title: "Portraits @ The Godfrey | Art Night Detroit",
           description:
             "April 13, 7–11pm at The Godfrey. Live art, DJs, portrait workshop, caricature booth.",
-          images: [{ url: "/arts-for-the-earth-banner.jpg", width: 1200, height: 630, alt: "Portraits @ The Godfrey" }],
+          images: [
+            {
+              url: "/portraits-godfrey-poster.png",
+              width: 1224,
+              height: 1584,
+              alt: "Art Night Detroit presents Portraits at The Godfrey",
+            },
+          ],
           type: "website",
           locale: "en_US",
         },
