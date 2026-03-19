@@ -1,6 +1,13 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export type QrTicketForEmail = {
+  /** CID reference for inline image, e.g. qr-ticket-1 */
+  cid: string;
+  /** Shown above the QR (e.g. "General Admission — Ticket 1") */
+  label: string;
+  /** PNG bytes as base64 */
+  base64Png: string;
+};
 
 export type TicketEmailPayload = {
   to: string;
@@ -10,6 +17,8 @@ export type TicketEmailPayload = {
   eventDescription?: string | null;
   lineItems: Array<{ name: string; quantity: number; unitPrice: number }>;
   total: number;
+  /** One QR per individual ticket */
+  qrTickets?: QrTicketForEmail[];
 };
 
 function formatDate(isoDate: string | null): string {
@@ -28,13 +37,15 @@ function formatDate(isoDate: string | null): string {
 }
 
 export async function sendTicketEmail(payload: TicketEmailPayload): Promise<{ ok: boolean; error?: string }> {
-  if (!process.env.RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
     console.warn('RESEND_API_KEY not set; skipping ticket email');
     return { ok: false, error: 'RESEND_API_KEY not set' };
   }
 
+  const resend = new Resend(apiKey);
   const from = process.env.RESEND_FROM ?? 'Art Night Detroit <onboarding@resend.dev>';
-  const { to, eventTitle, eventDate, eventLocation, lineItems, total } = payload;
+  const { to, eventTitle, eventDate, eventLocation, lineItems, total, qrTickets = [] } = payload;
 
   const linesHtml = lineItems
     .map(
@@ -42,6 +53,23 @@ export async function sendTicketEmail(payload: TicketEmailPayload): Promise<{ ok
         `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">${item.name}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">${item.quantity}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">$${(item.unitPrice * item.quantity).toFixed(2)}</td></tr>`
     )
     .join('');
+
+  const qrSection =
+    qrTickets.length > 0
+      ? `
+  <h2 style="font-size:1.1rem;margin:32px 0 16px">Your ticket QR codes</h2>
+  <p style="color:#444;margin-bottom:16px;font-size:0.95rem">Show one QR per person at entry. Each code is unique.</p>
+  ${qrTickets
+    .map(
+      (t) => `
+  <div style="text-align:center;margin-bottom:28px;padding:16px;border:1px solid #eee;border-radius:8px">
+    <p style="margin:0 0 12px;font-weight:600">${t.label}</p>
+    <img src="cid:${t.cid}" alt="Ticket QR" width="220" height="220" style="display:inline-block;max-width:100%;height:auto" />
+  </div>`
+    )
+    .join('')}
+`
+      : '';
 
   const html = `
 <!DOCTYPE html>
@@ -60,26 +88,44 @@ export async function sendTicketEmail(payload: TicketEmailPayload): Promise<{ ok
     <tbody>${linesHtml}</tbody>
   </table>
   <p style="text-align:right;font-weight:700;font-size:1.1rem">Total: $${total.toFixed(2)}</p>
+  ${qrSection}
   <p style="margin-top:24px;color:#666;font-size:0.9rem">Save this email as your confirmation. See you there!</p>
 </body>
 </html>
 `.trim();
 
+  const attachments =
+    qrTickets.length > 0
+      ? qrTickets.map((t, i) => ({
+          filename: `ticket-${i + 1}-qr.png`,
+          content: Buffer.from(t.base64Png, 'base64'),
+          contentId: t.cid,
+        }))
+      : undefined;
+
   try {
+    console.log('Sending ticket email via Resend:', {
+      to,
+      from,
+      subject: `Your tickets: ${eventTitle}`,
+      qrCount: qrTickets.length,
+    });
     const { data, error } = await resend.emails.send({
       from,
       to: [to],
       subject: `Your tickets: ${eventTitle}`,
       html,
+      attachments,
     });
     if (error) {
-      console.error('Resend error:', error);
-      return { ok: false, error: error.message };
+      console.error('Resend API error:', JSON.stringify(error, null, 2));
+      return { ok: false, error: error.message || JSON.stringify(error) };
     }
+    console.log('Resend email sent successfully:', { emailId: data?.id, to });
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('sendTicketEmail failed:', message);
+    console.error('sendTicketEmail exception:', err);
     return { ok: false, error: message };
   }
 }

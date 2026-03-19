@@ -8,7 +8,9 @@ import {
   updateTicketInventory,
   getEvent,
 } from 'buidl-ticketing';
-import { sendTicketEmail } from '../../../lib/sendTicketEmail';
+import { sendTicketEmail, type QrTicketForEmail } from '../../../lib/sendTicketEmail';
+import db from '../../../db/client';
+import { generateQrToken, getTicketVerifyUrl, qrPngBase64 } from '../../../lib/ticketQr';
 
 export const config = {
   api: {
@@ -36,7 +38,17 @@ export default async function handler(
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig = req.headers['stripe-signature'];
+  
+  console.log('Webhook received:', {
+    method: req.method,
+    hasSignature: !!sig,
+    hasWebhookSecret: !!webhookSecret,
+    webhookSecretPrefix: webhookSecret?.substring(0, 10),
+    headers: Object.keys(req.headers),
+  });
+
   if (!sig || !webhookSecret) {
+    console.error('Missing webhook credentials:', { sig: !!sig, secret: !!webhookSecret });
     return res.status(400).json({ error: 'Missing signature or webhook secret' });
   }
 
@@ -66,6 +78,12 @@ export default async function handler(
       const customerEmail =
         (session.customer_details?.email as string) || (session.customer_email as string) || '';
 
+      console.log('Processing checkout.session.completed:', {
+        sessionId: session.id,
+        customerEmail,
+        hasEmail: !!customerEmail,
+      });
+
       if (!checkoutSession.items || !Array.isArray(checkoutSession.items)) {
         console.error('Invalid checkout session items:', checkoutSession.items);
         return res.status(500).json({ error: 'Invalid checkout session items' });
@@ -75,6 +93,15 @@ export default async function handler(
         String((checkoutSession as { event_id?: string }).event_id ?? checkoutSession.eventId)
       );
       const eventRecord = await getEvent(eventId);
+      
+      console.log('Event details:', {
+        eventId,
+        hasEvent: !!eventRecord,
+        eventTitle: eventRecord?.title,
+      });
+
+      const qrTickets: QrTicketForEmail[] = [];
+      let ticketNumber = 1;
 
       for (const item of checkoutSession.items) {
         const ticketType = await getTicketType(item.ticketTypeId);
@@ -83,7 +110,7 @@ export default async function handler(
           continue;
         }
         for (let i = 0; i < item.quantity; i++) {
-          await createPurchasedTicket({
+          const created = await createPurchasedTicket({
             eventId,
             ticketTypeId: item.ticketTypeId,
             userId: customerEmail,
@@ -91,6 +118,24 @@ export default async function handler(
             purchaseDate: new Date(),
             status: 'valid',
           });
+          const row = created as { id?: number | string };
+          const ticketId = row?.id;
+          if (ticketId != null) {
+            const qrToken = generateQrToken();
+            try {
+              await db('purchased_tickets').where({ id: ticketId }).update({ qr_token: qrToken });
+            } catch (e) {
+              console.error('Failed to set qr_token (run migration add_qr_token?):', e);
+            }
+            const verifyUrl = getTicketVerifyUrl(qrToken);
+            const base64Png = await qrPngBase64(verifyUrl);
+            qrTickets.push({
+              cid: `qr-ticket-${ticketNumber}`,
+              label: `${ticketType.name} — Ticket ${ticketNumber}`,
+              base64Png,
+            });
+            ticketNumber++;
+          }
         }
         await updateTicketInventory(eventId, item.ticketTypeId, {
           reserved: ticketType.reserved - item.quantity,
@@ -102,24 +147,40 @@ export default async function handler(
       // Send ticket confirmation email via Resend (totals are in dollars from DB)
       const totalDollars = Number(checkoutSession.total ?? 0);
       if (customerEmail && eventRecord) {
-        const lineItems = await Promise.all(
-          checkoutSession.items.map(async (item) => {
-            const tt = await getTicketType(item.ticketTypeId);
-            return {
-              name: tt?.name ?? item.ticketTypeId,
-              quantity: item.quantity,
-              unitPrice: tt?.price ?? 0,
-            };
-          })
-        );
-        await sendTicketEmail({
-          to: customerEmail,
-          eventTitle: eventRecord.title ?? 'Event',
-          eventDate: eventRecord.date ?? null,
-          eventLocation: eventRecord.location ?? null,
-          eventDescription: eventRecord.description ?? null,
-          lineItems,
-          total: totalDollars,
+        try {
+          const lineItems = await Promise.all(
+            checkoutSession.items.map(async (item) => {
+              const tt = await getTicketType(item.ticketTypeId);
+              return {
+                name: tt?.name ?? item.ticketTypeId,
+                quantity: item.quantity,
+                unitPrice: tt?.price ?? 0,
+              };
+            })
+          );
+          const emailResult = await sendTicketEmail({
+            to: customerEmail,
+            eventTitle: eventRecord.title ?? 'Event',
+            eventDate: eventRecord.date ?? null,
+            eventLocation: eventRecord.location ?? null,
+            eventDescription: eventRecord.description ?? null,
+            lineItems,
+            total: totalDollars,
+            qrTickets,
+          });
+          if (!emailResult.ok) {
+            console.error('Failed to send ticket email:', emailResult.error);
+          } else {
+            console.log('Ticket email sent successfully to:', customerEmail);
+          }
+        } catch (emailError) {
+          console.error('Error sending ticket email:', emailError);
+          // Don't fail the webhook if email fails
+        }
+      } else {
+        console.warn('Skipping email send - missing email or event:', {
+          hasEmail: !!customerEmail,
+          hasEvent: !!eventRecord,
         });
       }
     } else if (event.type === 'checkout.session.expired') {
