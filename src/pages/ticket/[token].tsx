@@ -2,9 +2,11 @@ import styled from 'styled-components';
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import db from '../../db/client';
+import { TicketRedeem } from '../../components/TicketRedeem';
 
 type Props = {
   valid: boolean;
+  token?: string;
   eventTitle?: string;
   eventDate?: string | null;
   eventLocation?: string | null;
@@ -44,13 +46,26 @@ const Muted = styled.p`
   line-height: 1.5;
 `;
 
+const RedeemedBanner = styled.p`
+  background: rgba(185, 28, 28, 0.12);
+  color: #991b1b;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 0 0 1rem;
+`;
+
 export default function TicketVerifyPage({
   valid,
+  token,
   eventTitle,
   eventDate,
   eventLocation,
   ticketStatus,
 }: Props) {
+  const canRedeem = valid && token && ticketStatus === 'valid';
+  const isRedeemed = valid && ticketStatus === 'redeemed';
+
   return (
     <>
       <Head>
@@ -63,7 +78,11 @@ export default function TicketVerifyPage({
           {valid ? (
             <>
               <Title>Valid ticket</Title>
-              <Muted style={{ fontWeight: 600, color: '#166534' }}>✓ Confirmed</Muted>
+              {isRedeemed ? (
+                <RedeemedBanner>Already redeemed</RedeemedBanner>
+              ) : (
+                <Muted style={{ fontWeight: 600, color: '#166534' }}>✓ Confirmed</Muted>
+              )}
               <Muted>{eventTitle}</Muted>
               {eventDate && <Muted>Date: {eventDate}</Muted>}
               {eventLocation && <Muted>{eventLocation}</Muted>}
@@ -72,6 +91,7 @@ export default function TicketVerifyPage({
                   Status: {ticketStatus}
                 </Muted>
               )}
+              {canRedeem && <TicketRedeem token={token} />}
             </>
           ) : (
             <>
@@ -124,6 +144,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     return {
       props: {
         valid: true,
+        token,
         eventTitle: r.event_title,
         eventDate: r.event_date,
         eventLocation: r.event_location,
